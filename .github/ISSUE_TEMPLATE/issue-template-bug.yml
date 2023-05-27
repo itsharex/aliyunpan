@@ -1,47 +1,24 @@
 name: BUG提交
-
 labels: ["BUG"]
-
 body:
-
   - type: textarea
-
     attributes:
-
       label: 问题描述
-
     validations:
-
       required: true
-
   - type: textarea
-
     attributes:
-
       label: 复现复现
-
     validations:
-
       required: true
-
   - type: textarea
-
     attributes:
-
       label: 日志提交
-
       description: 日志位于设置-运行日志-复制日志
-
       placeholder: "请用```将日志内容包裹"
-
   - type: input
-
     attributes:
-
       label: 系统类型
-
       placeholder: "Windows"
-
     validations:
-
       required: true
