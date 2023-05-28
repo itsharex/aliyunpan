@@ -1,6 +1,6 @@
 {
   "appId": "com.alixby.app",
-  "productName": "alixby",
+  "productName": "阿里云盘小白羊",
   "copyright": "copyright ©2023 Odomu",
   "asar": true,
   "compression": "maximum",
@@ -8,43 +8,46 @@
   "files": [ "dist" ],
   "extraResources": [
     { "from": "./static/engine/aria2.conf", "to": "./engine/aria2.conf"},
-    { "from": "./static/crx", "to": "./crx"},
-    { "from": "./app.ico", "to": "."},
-    { "from": "./app.png", "to": "."}
+    { "from": "./static/crx", "to": "./crx"}
   ],
   "mac": {
+    "icon": "./static/images/icon.icns",
     "type": "distribution",
-    "artifactName": "${productName}-${version}-mac-${arch}.${ext}",
+    "artifactName": "alixby-${version}-mac-${arch}.${ext}",
     "darkModeSupport": true,
     "hardenedRuntime": true,
     "category": "public.app-category.utilities",
-    "extraResources": {
-      "from": "./static/engine/darwin/${arch}",
-      "to": "./engine"
-    },
+    "extraResources": [
+      { "from": "./static/images/icon.icns", "to": "./images/icon.icns"},
+      { "from": "./static/images/icon_64x64.png", "to": "./images/icon_64x64.png"},
+      { "from": "./static/engine/darwin/${arch}", "to": "./engine"}
+    ],
     "target": [
       { "target": "dmg", "arch": [ "x64", "arm64" ] }
     ]
   },
   "linux": {
+    "icon": "./static/images/icon_256x256.png",
     "category": "Network",
-    "artifactName": "${productName}-${version}-linux-${arch}.${ext}",
-    "extraResources": {
-      "from": "./static/engine/linux/${arch}",
-      "to": "./engine"
-    },
+    "artifactName": "alixby-${version}-linux-${arch}.${ext}",
+    "extraResources": [
+      { "from": "./static/images/icon_64x64.png", "to": "./images/icon_64x64.png"},
+      { "from": "./static/images/icon_256x256.png", "to": "./images/icon_256x256.png"},
+      { "from": "./static/engine/linux/${arch}", "to": "./engine"}
+    ],
     "target": [
       { "target": "AppImage", "arch": [  "x64", "arm64", "armv7l" ] },
       { "target": "deb", "arch": [ "x64",  "arm64", "armv7l" ] }
     ]
   },
   "win": {
-    "icon": "./app.ico",
-    "artifactName": "${productName}-${version}-win-${arch}.${ext}",
-    "extraResources": {
-      "from": "./static/engine/win32/${arch}",
-      "to": "./engine"
-    },
+    "icon": "./static/images/icon_256x256.ico",
+    "artifactName": "alixby-${version}-win-${arch}.${ext}",
+    "extraResources": [
+      { "from": "./static/images/icon_64x64.png", "to": "./images/icon_64x64.png"},
+      { "from": "./static/images/icon_256x256.ico", "to": "./images/icon_256x256.ico"},
+      { "from": "./static/engine/win32/${arch}", "to": "./engine"}
+    ],
     "target": [
       { "target": "nsis", "arch": [ "x64", "ia32" ] }
     ]
@@ -58,8 +61,7 @@
   },
   "nsis": {
     "oneClick": false,
-    "perMachine": true,
-    "allowElevation": true,
+    "perMachine": false,
     "allowToChangeInstallationDirectory": true,
     "deleteAppDataOnUninstall": false
   },

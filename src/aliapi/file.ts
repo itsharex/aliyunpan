@@ -9,7 +9,7 @@ import { ICompilationList, IDownloadUrl, IOfficePreViewUrl, IVideoPreviewUrl, IV
 
 export default class AliFile {
   
-  static async ApiFileInfo(user_id: string, drive_id: string, file_id: string): Promise<IAliFileItem | undefined> {
+  static async ApiFileInfo(user_id: string, drive_id: string, file_id: string): Promise<any | undefined> {
     if (!user_id || !drive_id || !file_id) return undefined
     let url = ''
     let postData = {}
@@ -38,10 +38,12 @@ export default class AliFile {
 
     if (AliHttp.IsSuccess(resp.code)) {
       return resp.body as IAliFileItem
+    } else if (AliHttp.HttpCodeBreak(resp.code)) {
+      return resp.body as string
     } else {
       DebugLog.mSaveWarning('ApiFileInfo err=' + file_id + ' ' + (resp.code || ''))
     }
-    return undefined
+    return '网络错误'
   }
 
   
@@ -89,7 +91,6 @@ export default class AliFile {
       expire_sec: useSettingStore().uiEnableOpenApi ? '36000' : expire_sec
     }
     const resp = await AliHttp.Post(url, postData, user_id, '', true)
-
     if (AliHttp.IsSuccess(resp.code)) {
       data.url = resp.body.url
       data.size = resp.body.size
@@ -101,6 +102,8 @@ export default class AliFile {
       return '文件已放入回收站'
     } else if (resp.body.code) {
       return resp.body.code as string
+    } else if (AliHttp.HttpCodeBreak(resp.code)) {
+      return resp.body as string
     } else {
       DebugLog.mSaveWarning('ApiFileDownloadUrl err=' + file_id + ' ' + (resp.code || ''))
     }
@@ -379,7 +382,10 @@ export default class AliFile {
     if (!user_id || !drive_id || !file_id) return ''
     const downUrl = await AliFile.ApiFileDownloadUrl(user_id, drive_id, file_id, 14400)
     if (typeof downUrl == 'string') return downUrl
-    const resp = await AliHttp.GetString(downUrl.url, '', filesize, maxsize) 
+    // 原始文件大小
+    if (filesize === -1) filesize = downUrl.size
+    if (maxsize === -1) maxsize = downUrl.size
+    const resp = await AliHttp.GetString(downUrl.url, '', filesize, maxsize)
     if (AliHttp.IsSuccess(resp.code)) {
       if (typeof resp.body == 'string') return resp.body
       return JSON.stringify(resp.body, undefined, 2)

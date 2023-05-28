@@ -165,8 +165,8 @@ const createVideo = async (name: string) => {
       await getVideoCursor(ArtPlayerRef, pageVideo.play_cursor)
     }
     // 视频播放完毕
-    ArtPlayerRef.on('video:ended', () => {
-      updateVideoTime()
+    ArtPlayerRef.on('video:ended', async () => {
+      await updateVideoTime()
       if (storage.get('autoPlayNext')) {
         const autoPlayNext = () => {
           const item = playList[++autoPlayNumber]
@@ -185,8 +185,8 @@ const createVideo = async (name: string) => {
       }
     })
     // 播放已暂停
-    ArtPlayerRef.on('video:pause', () => {
-      updateVideoTime()
+    ArtPlayerRef.on('video:pause', async () => {
+      await updateVideoTime()
     })
     // 音量发生变化
     ArtPlayerRef.on('video:volumechange', () => {
@@ -233,6 +233,11 @@ const refreshSetting = async (art: Artplayer, item: any) => {
   pageVideo.play_cursor = item.play_cursor
   pageVideo.file_name = item.html
   pageVideo.file_id = item.file_id || ''
+  // 释放字幕Blob
+  if (onlineSubBlobUrl.length > 0) {
+    URL.revokeObjectURL(onlineSubBlobUrl)
+    onlineSubBlobUrl = ''
+  }
   // 刷新信息
   await getVideoInfo(art)
 }
@@ -362,7 +367,7 @@ const getPlayList = async (art: Artplayer, file_id?: string) => {
       html: pageVideo.html.length > 20 ? pageVideo.html.substring(0, 40) + '...' : pageVideo.html,
       selector: playList,
       onSelect: async (item: SettingOption) => {
-        updateVideoTime()
+        await updateVideoTime()
         await refreshSetting(art, item)
         return item.html.length > 20 ? item.html.substring(0, 40) + '...' : item.html
       }
@@ -389,10 +394,13 @@ const getVideoCursor = async (art: Artplayer, play_cursor?: number) => {
   }
 }
 
+let onlineSubBlobUrl: string = ''
 const loadOnlineSub = async (art: Artplayer, item: any) => {
-  const data = await AliFile.ApiFileDownloadUrl(pageVideo.user_id, pageVideo.drive_id, item.file_id, 14400)
-  if (typeof data !== 'string' && data.url && data.url != '') {
-    await art.subtitle.switch(data.url, {
+  const data = await AliFile.ApiFileDownText(pageVideo.user_id, pageVideo.drive_id, item.file_id, -1, -1)
+  if (data) {
+    const blob = new Blob([data], { type: item.ext })
+    onlineSubBlobUrl = URL.createObjectURL(blob)
+    await art.subtitle.switch(onlineSubBlobUrl, {
       name: item.name,
       type: item.ext,
       encoding: 'utf-8',
@@ -537,16 +545,21 @@ const getSubTitleList = async (art: Artplayer) => {
   })
 }
 
-const updateVideoTime = () => {
-  AliFile.ApiUpdateVideoTime(
+const updateVideoTime = async () => {
+  await AliFile.ApiUpdateVideoTime(
     pageVideo.user_id,
     pageVideo.drive_id,
     pageVideo.file_id,
     ArtPlayerRef.currentTime
   )
 }
-const handleHideClick = () => {
-  updateVideoTime()
+const handleHideClick = async () => {
+  await updateVideoTime()
+  // 释放字幕Blob
+  if (onlineSubBlobUrl.length > 0) {
+    URL.revokeObjectURL(onlineSubBlobUrl)
+    onlineSubBlobUrl = ''
+  }
   window.close()
 }
 
