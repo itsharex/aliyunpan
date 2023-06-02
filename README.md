@@ -13,6 +13,11 @@
 
 [![author](https://img.shields.io/badge/作者-@odomu-000000.svg?style=flat-square&logo=GitHub)](https://github.com/odomu) [![Build](https://github.com/odomu/aliyunpan/workflows/Build/badge.svg)](https://github.com/odomu/aliyunpan/actions) [![downloads](https://img.shields.io/github/downloads/odomu/aliyunpan/total.svg?style=flat-square)](https://github.com/odomu/aliyunpan/releases) [![](https://img.shields.io/github/release/odomu/aliyunpan.svg?style=flat-square)](https://github.com/odomu/aliyunpan/releases) ![](https://img.shields.io/github/license/odomu/aliyunpan.svg?style=flat-square) [![Telegram-group](https://img.shields.io/badge/Telegram-%E7%BE%A4%E7%BB%84-blue)](https://t.me/+n1YbKE0JNo41MWRh)
 
+### 赞赏码
+<p align="left">
+  <img height="280" width="280" src="https://github.com/odomu/aliyunpan/assets/50035498/75efbbf3-36c0-4991-9dff-4ae319d09e7c" />
+</p>
+
 #### 为什么要用小白羊？
 
 * 小白羊支持同时登录多个账号管理
