@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import { useAppStore } from '../store'
+import { useAppStore, usePanFileStore, useSettingStore } from '../store'
 import { onBeforeUnmount, onMounted } from 'vue'
 import Artplayer from 'artplayer'
 import HlsJs from 'hls.js'
@@ -8,6 +8,7 @@ import AliDirFileList from '../aliapi/dirfilelist'
 import levenshtein from 'fast-levenshtein'
 import { type SettingOption } from 'artplayer/types/setting'
 import { type Option } from 'artplayer/types/option'
+import AliFileCmd from '../aliapi/filecmd'
 
 const appStore = useAppStore()
 const pageVideo = appStore.pageVideo!
@@ -51,14 +52,14 @@ const playM3U8 = (video: HTMLMediaElement, url: string, art: Artplayer) => {
     // @ts-ignore
     if (art.hls) art.hls.destroy()
     const hls = new HlsJs({
-      maxBufferLength: 20,
+      maxBufferLength: 50,
       maxBufferSize: 60 * 1000 * 1000
     })
     hls.detachMedia()
     hls.loadSource(url)
     hls.attachMedia(video)
     hls.on(HlsJs.Events.MANIFEST_PARSED, async () => {
-      await art.play()
+      await art.play().catch((err) => {})
       await getVideoCursor(art, pageVideo.play_cursor)
     })
     hls.on(HlsJs.Events.ERROR, (event, data) => {
@@ -91,6 +92,7 @@ type selectorItem = {
   name?: string;
   default?: boolean;
   file_id?: string;
+  description?: string;
   play_cursor?: number;
 }
 
@@ -141,7 +143,7 @@ const createVideo = async (name: string) => {
   ArtPlayerRef.on('ready', async () => {
     // @ts-ignore
     if (!ArtPlayerRef.hls) {
-      await ArtPlayerRef.play()
+      await ArtPlayerRef.play().catch((err) => {})
       await getVideoCursor(ArtPlayerRef, pageVideo.play_cursor)
     }
     // 视频播放完毕
@@ -213,6 +215,14 @@ const refreshSetting = async (art: Artplayer, item: any) => {
   pageVideo.play_cursor = item.play_cursor
   pageVideo.file_name = item.html
   pageVideo.file_id = item.file_id || ''
+  // 更新标记
+  const settingStore = useSettingStore()
+  if (settingStore.uiAutoColorVideo && !item.description) {
+    AliFileCmd.ApiFileColorBatch(pageVideo.user_id, pageVideo.drive_id, 'c5b89b8', [item.file_id])
+      .then((success) => {
+        usePanFileStore().mColorFiles('c5b89b8', success)
+      })
+  }
   // 释放字幕Blob
   if (onlineSubBlobUrl.length > 0) {
     URL.revokeObjectURL(onlineSubBlobUrl)
@@ -325,6 +335,7 @@ const getPlayList = async (art: Artplayer, file_id?: string) => {
           html: fileList[i].name,
           name: fileList[i].name,
           file_id: fileList[i].file_id,
+          description: fileList[i].description,
           play_cursor: fileList[i].play_cursor,
           default: fileList[i].file_id === pageVideo.file_id
         })
